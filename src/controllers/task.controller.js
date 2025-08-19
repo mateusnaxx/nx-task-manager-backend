@@ -1,4 +1,5 @@
 const TaskModel = require("../models/task.model");
+const { notFoundError, idInvalidError } = require("../errors/mongodb.errors");
 
 class TaskController {
     constructor(req, res) {
@@ -11,7 +12,7 @@ class TaskController {
             const tasks = await TaskModel.find({});
 
             if (tasks.length === 0) {
-                return this.res.status(404).send({ error: "No tasks found" });
+                return notFoundError(res);
             }
 
             this.res.status(200).send(tasks);
@@ -28,11 +29,14 @@ class TaskController {
             const task = await TaskModel.findById(taskId);
 
             if (!task) {
-                return this.res.status(404).send({ error: "Task not found" });
+                return notFoundError(this.res);
             }
 
             this.res.status(200).send(task);
         } catch (error) {
+            if (error.name === "CastError") {
+                return idInvalidError(this.res);
+            }
             this.res
                 .status(500)
                 .send({ error: "Error when searching for task" });
@@ -62,7 +66,7 @@ class TaskController {
             const requestedUpdates = Object.keys(taskData);
 
             if (!taskToUpdate) {
-                return this.res.status(404).send({ error: "Task not found" });
+                return notFoundError(this.res);
             }
 
             for (const update of requestedUpdates) {
@@ -79,6 +83,9 @@ class TaskController {
 
             this.res.status(200).send(updatedTask);
         } catch (error) {
+            if (error.name === "CastError") {
+                return idInvalidError(this.res);
+            }
             this.res.status(500).send({ error: "Error when updating task" });
         }
     }
@@ -89,11 +96,14 @@ class TaskController {
             const deletedTask = await TaskModel.findByIdAndDelete(taskId);
 
             if (!deletedTask) {
-                return this.res.status(404).send({ error: "Task not found" });
+                return notFoundError(this.res);
             }
 
             this.res.status(200).send(deletedTask);
         } catch (error) {
+            if (error.name === "CastError") {
+                return idInvalidError(this.res);
+            }
             this.res.status(500).send({ error: "Error when deleting task" });
         }
     }
