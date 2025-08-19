@@ -52,6 +52,38 @@ app.post("/tasks", async (req, res) => {
     }
 });
 
+app.patch("/tasks/:id", async (req, res) => {
+    try {
+        const taskId = req.params.id;
+        const taskData = req.body;
+
+        const taskToUpdate = await taskModel.findById(taskId);
+
+        const allowedUpdates = ["isCompleted"];
+
+        const requestedUpdates = Object.keys(taskData);
+
+        if (!taskToUpdate) {
+            return res.status(404).send({ error: "Task not found" });
+        }
+
+        for (const update of requestedUpdates) {
+            if (allowedUpdates.includes(update)) {
+                taskToUpdate[update] = taskData[update];
+            } else {
+                return res.status(400).send({ error: "one or more inserted fields are not editable!" });
+            }
+            
+        }
+
+        const updatedTask = await taskToUpdate.save();
+
+        res.status(200).send(updatedTask);
+    } catch (error) {
+        res.status(500).send({ error: "Error when updating task" });
+    }
+});
+
 app.delete("/tasks/:id", async (req, res) => {
     try {
         const taskId = req.params.id;
