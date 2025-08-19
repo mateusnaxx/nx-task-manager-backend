@@ -1,6 +1,9 @@
 const TaskModel = require("../models/task.model");
 const { notFoundError, idInvalidError } = require("../errors/mongodb.errors");
-const { notAllowedFieldsToUpdateError } = require("../errors/general.errors");
+const {
+    notAllowedFieldsToUpdateError,
+    GenericServerError,
+} = require("../errors/general.errors");
 
 class TaskController {
     constructor(req, res) {
@@ -18,9 +21,7 @@ class TaskController {
 
             this.res.status(200).send(tasks);
         } catch (error) {
-            this.res
-                .status(500)
-                .send({ error: "Error when searching for tasks" });
+            GenericServerError(this.res);
         }
     }
 
@@ -38,9 +39,7 @@ class TaskController {
             if (error.name === "CastError") {
                 return idInvalidError(this.res);
             }
-            this.res
-                .status(500)
-                .send({ error: "Error when searching for task" });
+            GenericServerError(this.res);
         }
     }
 
@@ -51,7 +50,7 @@ class TaskController {
 
             this.res.status(201).send(newTask);
         } catch (error) {
-            this.res.status(500).send({ error: "Error when creating task" });
+            GenericServerError(this.res);
         }
     }
 
@@ -85,7 +84,7 @@ class TaskController {
             if (error.name === "CastError") {
                 return idInvalidError(this.res);
             }
-            this.res.status(500).send({ error: "Error when updating task" });
+            GenericServerError(this.res);
         }
     }
 
@@ -103,7 +102,7 @@ class TaskController {
             if (error.name === "CastError") {
                 return idInvalidError(this.res);
             }
-            this.res.status(500).send({ error: "Error when deleting task" });
+            GenericServerError(this.res);
         }
     }
 }
