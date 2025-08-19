@@ -19,10 +19,25 @@ app.get("/tasks", async (req, res) => {
         if (tasks.length === 0) {
             return res.status(404).send({ error: "No tasks found" });
         }
-        
+
         res.status(200).send(tasks);
     } catch (error) {
         res.status(500).send({ error: "Error when searching for tasks" });
+    }
+});
+
+app.get("/tasks/:id", async (req, res) => {
+    try {
+        const taskId = req.params.id;
+        const task = await taskModel.findById(taskId);
+
+        if (!task) {
+            return res.status(404).send({ error: "Task not found" });
+        }
+
+        res.status(200).send(task);
+    } catch (error) {
+        res.status(500).send({ error: "Error when searching for task" });
     }
 });
 
