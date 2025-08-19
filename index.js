@@ -15,6 +15,11 @@ connectToDatabase();
 app.get("/tasks", async (req, res) => {
     try {
         const tasks = await taskModel.find({});
+        
+        if (tasks.length === 0) {
+            return res.status(404).send({ error: "No tasks found" });
+        }
+        
         res.status(200).send(tasks);
     } catch (error) {
         res.status(500).send({ error: "Error when searching for tasks" });
@@ -23,12 +28,27 @@ app.get("/tasks", async (req, res) => {
 
 app.post("/tasks", async (req, res) => {
     try {
-        const newTask = new taskModel(req.body)
+        const newTask = new taskModel(req.body);
         await newTask.save();
 
-        res.status(201).send(newTask)
+        res.status(201).send(newTask);
     } catch (error) {
         res.status(500).send({ error: "Error when creating task" });
+    }
+});
+
+app.delete("/tasks/:id", async (req, res) => {
+    try {
+        const taskId = req.params.id;
+        const deletedTask = await taskModel.findByIdAndDelete(taskId);
+
+        if (!deletedTask) {
+            return res.status(404).send({ error: "Task not found" });
+        }
+
+        res.status(200).send(deletedTask);
+    } catch (error) {
+        res.status(500).send({ error: "Error when deleting task" });
     }
 });
 
